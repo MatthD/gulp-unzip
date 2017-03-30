@@ -1,8 +1,9 @@
 var through = require('through2');
-var gutil = require('gulp-util')
-var unzip = require('unzipper')
-var fs = require('fs')
-var defaults = require('defaults')
+var gutil = require('gulp-util');
+var unzip = require('unzipper');
+var fs = require('fs');
+var path = require('path');
+var defaults = require('defaults');
 
 module.exports = function(options){
   function transform(file, enc, callback){
@@ -15,6 +16,9 @@ module.exports = function(options){
     options = options || {};
     opts.filter = options.filter || function () { return true; };
     opts.keepEmpty = options.keepEmpty || false;
+    opts.makefolder = options.makefolder || false;
+
+    let dir = (opts && opts.makefolder) ? path.basename(file.path, path.extname(file.path)) : '';
 
     // unzip file
     var self = this
@@ -35,7 +39,7 @@ module.exports = function(options){
           if(entry.type == 'File' && (chunks.length > 0 || opts.keepEmpty)){
             self.push(new gutil.File({
               cwd : "./",
-              path : entry.path,
+              path : path.join(dir, entry.path),
               contents: Buffer.concat(chunks)
             }))
           }
